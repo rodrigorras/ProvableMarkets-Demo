@@ -1,3 +1,7 @@
+
+<img width="540" height="169" alt="image" src="https://github.com/user-attachments/assets/7634e9cb-7c22-41c7-ba16-1e15d260acd4" />
+
+
 # ProvableMarkets Demo
 
 Simple FastAPI app with:
