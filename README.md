@@ -17,7 +17,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 
 # Install dependencies
-pip install fastapi==0.104.1 uvicorn[standard]==0.24.0
+pip install -r requirements.txt
 
 # Run the app
 uvicorn main:app --reload
