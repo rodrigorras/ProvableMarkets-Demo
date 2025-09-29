@@ -10,6 +10,22 @@ app = FastAPI()
 class HelloRequest(BaseModel):
     name: str
 
+
+# GET /ping endpoint
+@app.get("/ping")
+async def ping():
+    return {"message": "pong"}
+
+# POST /hello endpoint
+@app.post("/hello")
+async def hello(request: HelloRequest):
+    # Get current timestamp
+    timestamp = datetime.now().isoformat()
+    # Create response message
+    message = f"Hello, {request.name}! Timestamp: {timestamp}"
+    return {"message": message}
+
+
 # Default route (GET /) with instructions
 @app.get("/", response_class=HTMLResponse)
 async def root():
@@ -278,7 +294,7 @@ async def root():
             <div class="container">
                 <div class="header">
                     <h1>ProvableMarkets API</h1>
-                    <p>Simple API with two endpoints</p>
+                    <p>Simple API</p>
                 </div>
                 
                 <div class="content">
@@ -322,7 +338,7 @@ async def root():
                         <form id="helloForm" onsubmit="sendPostRequest(event)">
                             <div class="form-group">
                                 <label for="name">Your name:</label>
-                                <input type="text" id="name" name="name" value="Alice">
+                                <input type="text" id="name" name="name" value="Rodrigo">
                             </div>
                             <button type="submit">Send Request</button>
                         </form>
@@ -375,18 +391,6 @@ async def root():
     </html>
     """
 
-# GET /ping endpoint
-@app.get("/ping")
-async def ping():
-    return {"message": "pong"}
 
-# POST /hello endpoint
-@app.post("/hello")
-async def hello(request: HelloRequest):
-    # Get current timestamp
-    timestamp = datetime.now().isoformat()
-    # Create response message
-    message = f"Hello, {request.name}! Timestamp: {timestamp}"
-    return {"message": message}
 
 
