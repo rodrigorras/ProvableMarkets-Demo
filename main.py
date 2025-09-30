@@ -324,11 +324,11 @@ async def root():
                     <h3>1. Using curl</h3>
                     <pre>curl -X POST http://127.0.0.1:8000/hello \
   -H "Content-Type: application/json" \
-  -d '{"name":"Alice"}'</pre>
+  -d '{"name":"Rodrigo"}'</pre>
 
 
-                    <p>Expected Output: <code>{"message": "Hello, Alice! Timestamp: 2025-09-29T19:28:45.123456"}</code></p>
-
+                    <p>Expected Output: <code>{"message": "Hello, Rodrigo! Timestamp: 2025-09-29T19:28:45.123456"}</code></p>
+                    <p>Tip: get the output from "kubectl get svc" and change the endpoint address  </p>
                     <h3>2. Swagger documentation</h3>
                     <p>Check out <a href="/docs" target="_blank">/docs</a> for interactive API documentation where you can test endpoints easily.</p>
 
