@@ -1,0 +1,57 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      # 3. Install dependencies & test
+      - name: Install dependencies
+        run: |
+          pip install -r app/requirements.txt
+      - name: Run tests
+        run: |
+          python -m pytest tests_simple.py
+
+      # 4. Login to AWS ECR
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: <YOUR_REGION>
+
+      - name: Login to ECR
+        run: |
+          aws ecr get-login-password --region <YOUR_REGION> | docker login --username AWS --password-stdin <AWS_ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com
+
+      # 5. Build & push Docker image
+      - name: Build Docker image
+        run: |
+          docker build -t <AWS_ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/my-python-app:latest .
+          docker push <AWS_ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/my-python-app:latest
+
+      # 6. Deploy to EKS using Helm
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Update Kubeconfig
+        run: |
+          aws eks update-kubeconfig --region <YOUR_REGION> --name <EKS_CLUSTER_NAME>_
