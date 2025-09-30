@@ -1,5 +1,5 @@
-# Build stage
-FROM python:3.12-alpine
+# Get Slim version of Python
+FROM python:3.12-slim
 
 # Set working directory
 WORKDIR /app
@@ -7,9 +7,7 @@ WORKDIR /app
 # Copy requirements and install
 COPY requirements.txt .
 RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
-
-# Copy app code
+RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Expose FastAPI port

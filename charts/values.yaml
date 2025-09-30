@@ -1,9 +1,9 @@
 # Default values for provablemarkets-demo
-replicaCount: 1
+replicaCount: 2
 
 image:
   repository: rodrigorras/provablemarkets-demo
-  pullPolicy: IfNotPresent
+  imagePullPolicy: Always
   tag: "latest"
 
 imagePullSecrets: []
@@ -11,8 +11,9 @@ nameOverride: ""
 fullnameOverride: ""
 
 service:
-  type: ClusterIP
+  type: LoadBalancer
   port: 80
+  targetPort: 8000
 
 ingress:
   enabled: false
