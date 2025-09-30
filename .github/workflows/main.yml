@@ -13,6 +13,7 @@ jobs:
       AWS_REGION: eu-central-1
       EKS_CLUSTER_NAME: provablemarkets-mineks-cluster
       DOCKERHUB_USERNAME: rodrigorras
+      IMAGE_TAG: ${{ github.sha }}
 
     steps:
       # 1. Checkout code
