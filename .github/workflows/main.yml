@@ -67,4 +67,6 @@ jobs:
       # 9. Deploy using Helm
       - name: Deploy with Helm
         run: |
-          helm upgrade --install my-provablemarkets ./charts --namespace default
+          helm upgrade --install my-provablemarkets ./charts \
+            --namespace default \
+            --set image.tag=$IMAGE_TAG
