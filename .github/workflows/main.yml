@@ -41,18 +41,26 @@ jobs:
         run: |
           docker push $DOCKERHUB_USERNAME/provablemarkets-demo:latest
 
-      # 6. Setup kubectl
+         # 6. Configure AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: $AWS_REGION
+
+      # 7. Setup kubectl
       - name: Setup kubectl
-        uses: azure/setup-kubectl@v3
+        uses: actions/setup-kubectl@v3
         with:
           version: 'v1.28.0'
 
-      # 7. Update kubeconfig to connect to EKS
+      # 8. Update kubeconfig to connect to EKS
       - name: Update kubeconfig
         run: |
           aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER_NAME
 
-      # 8. Deploy using Helm
+      # 9. Deploy using Helm
       - name: Deploy with Helm
         run: |
           helm install my-provablemarkets ./charts --namespace default
