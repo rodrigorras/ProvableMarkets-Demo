@@ -53,7 +53,7 @@ jobs:
       - name: Setup kubectl
         uses: azure/setup-kubectl@v4
         with:
-          version: 'v1.33.0
+          version: 'v1.33.0'
 
       # 8. Update kubeconfig to connect to EKS
       - name: Update kubeconfig
