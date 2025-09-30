@@ -13,7 +13,7 @@ jobs:
       AWS_REGION: eu-central-1
       EKS_CLUSTER_NAME: provablemarkets-mineks-cluster
       DOCKERHUB_USERNAME: rodrigorras
-      IMAGE_TAG: ${{ github.sha }}
+      IMAGE_TAG: ${GITHUB_SHA::8}
 
     steps:
       # 1. Checkout code
@@ -30,20 +30,17 @@ jobs:
       # 3. Build Docker image with Git SHA tag
       - name: Build Docker image
         run: |
-          IMAGE_TAG=${GITHUB_SHA::8}  # first 8 chars of commit SHA
           echo "Using image tag: $IMAGE_TAG"
           docker build -t $DOCKERHUB_USERNAME/provablemarkets-demo:$IMAGE_TAG .
       
       # 4. Run tests inside the container
       - name: Run tests
         run: |
-          IMAGE_TAG=${GITHUB_SHA::8}
           docker run --rm $DOCKERHUB_USERNAME/provablemarkets-demo:$IMAGE_TAG python -m pytest tests_simple.py -v
       
       # 5. Push Docker image to Docker Hub
       - name: Push Docker image
         run: |
-          IMAGE_TAG=${GITHUB_SHA::8}
           docker push $DOCKERHUB_USERNAME/provablemarkets-demo:$IMAGE_TAG
 
       # 6. Configure AWS credentials
