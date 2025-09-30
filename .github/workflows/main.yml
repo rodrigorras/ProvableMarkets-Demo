@@ -49,11 +49,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: $AWS_REGION
 
-      # 7. Configure AWS credentials
+      # 7 Set up kubectl
       - name: Setup kubectl
-        uses: actions/setup-kubectl@v3
+        uses: azure/setup-kubectl@v4
         with:
-          version: 'v1.28.0'
+          version: 'v1.33.0
 
       # 8. Update kubeconfig to connect to EKS
       - name: Update kubeconfig
