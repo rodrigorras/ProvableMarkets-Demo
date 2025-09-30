@@ -5,68 +5,109 @@ on:
     branches:
       - main
 
+env:
+  AWS_REGION: eu-central-1
+  EKS_CLUSTER_NAME: provablemarkets-mineks-cluster
+  DOCKERHUB_USERNAME: rodrigorras
+
 jobs:
-  build-and-deploy:
+  # ----------------------------
+  # Stage 1: Build Docker image
+  # ----------------------------
+  build:
     runs-on: ubuntu-latest
-
-    env:
-      AWS_REGION: eu-central-1
-      EKS_CLUSTER_NAME: provablemarkets-mineks-cluster
-      DOCKERHUB_USERNAME: rodrigorras
-
+    outputs:
+      image_tag: ${{ steps.set_tag.outputs.IMAGE_TAG }}
     steps:
-      # 1. Checkout code
       - name: Checkout code
         uses: actions/checkout@v3
-        
-      # 2. Set Image TAG
+
       - name: Set IMAGE_TAG
-        run: echo "IMAGE_TAG=${GITHUB_SHA::8}" >> $GITHUB_ENV
+        id: set_tag
+        run: |
+          echo "IMAGE_TAG=${GITHUB_SHA::8}" >> $GITHUB_ENV
+          echo "::set-output name=IMAGE_TAG::${GITHUB_SHA::8}"
 
-
-      # 3. Login to Docker Hub
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 4. Build Docker image with Git SHA tag
       - name: Build Docker image
         run: |
           echo "Using image tag: $IMAGE_TAG"
           docker build -t $DOCKERHUB_USERNAME/provablemarkets-demo:$IMAGE_TAG .
-      
-      # 5. Run tests inside the container
+
+  # ----------------------------
+  # Stage 2: Test Docker image
+  # ----------------------------
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Use IMAGE_TAG from build
+        run: echo "IMAGE_TAG=${{ needs.build.outputs.image_tag }}" >> $GITHUB_ENV
+
       - name: Run tests
         run: |
           docker run --rm $DOCKERHUB_USERNAME/provablemarkets-demo:$IMAGE_TAG python -m pytest tests_simple.py -v
-      
-      # 6. Push Docker image to Docker Hub
+
+  # ----------------------------
+  # Stage 3: Push Docker image
+  # ----------------------------
+  push:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set IMAGE_TAG from build
+        run: echo "IMAGE_TAG=${{ needs.build.outputs.image_tag }}" >> $GITHUB_ENV
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Push Docker image
         run: |
           docker push $DOCKERHUB_USERNAME/provablemarkets-demo:$IMAGE_TAG
 
-      # 7. Configure AWS credentials
+  # ----------------------------
+  # Stage 4: Deploy with Helm
+  # ----------------------------
+  helm-deploy:
+    runs-on: ubuntu-latest
+    needs: push
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set IMAGE_TAG from build
+        run: echo "IMAGE_TAG=${{ needs.build.outputs.image_tag }}" >> $GITHUB_ENV
+
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v3  # Updated to v3
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}  # Fixed region reference
+          aws-region: ${{ env.AWS_REGION }}
 
-      # 8. Set up kubectl
       - name: Setup kubectl
         uses: azure/setup-kubectl@v4
         with:
           version: 'v1.33.0'
 
-      # 9. Update kubeconfig to connect to EKS
       - name: Update kubeconfig
         run: |
           aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.EKS_CLUSTER_NAME }}
 
-      # 10. Deploy using Helm
       - name: Deploy with Helm
         run: |
           helm upgrade --install my-provablemarkets ./charts \
