@@ -294,7 +294,7 @@ async def root():
             <div class="container">
                 <div class="header">
                     <h1>ProvableMarkets API</h1>
-                    <p>Simple API</p>
+                    <p>Simple API - modified 30/09/2025 13:28 </p>
                 </div>
                 
                 <div class="content">
